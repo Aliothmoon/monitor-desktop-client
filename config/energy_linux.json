@@ -1,0 +1,29 @@
+{
+  "name": "monitor-desktop-client",
+  "projectPath": "@",
+  "frameworkPath": "",
+  "assetsDir": "assets",
+  "outputFilename": "monitor-desktop-client",
+  "libemfs": "libs",
+  "info": {
+    "title": "monitor-desktop-client",
+    "wmClass": "monitor-desktop-client",
+    "icon": "@/resources/icon.png",
+    "companyName": "monitor-desktop-client",
+    "productName": "monitor-desktop-client",
+    "productVersion": "1.0.0",
+    "comments": "Built using ENERGY (https://github.com/energye/energy)"
+  },
+  "dpkg": {
+    "include": [],
+    "exclude": ["cache"],
+    "package": "com.monitor-desktop-client.monitor-desktop-client",
+    "homepage": "https://github.com/energye/energy",
+    "compress": "7zz",
+    "compressName": "framework.7z"
+  },
+  "author": {
+    "name": "yanghy",
+    "email": "snxamdf@126.com"
+  }
+}
