@@ -50,10 +50,21 @@ func (s *sniStreamFactory) New(netFlow, tcpFlow gopacket.Flow) tcpassembly.Strea
 	return &r
 }
 
-const device = `\Device\NPF_{D0AD4464-C274-4D37-BFFF-3B9C8B06213F}`
+const device = `\Device\NPF_{28B33438-DE72-48EF-98F9-8791DFFE27A9}`
 
 func main() {
 	// 选择网卡（可手动指定）
+
+	ifs, err := pcap.FindAllDevs()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	for _, inter := range ifs {
+		for _, ip := range inter.Addresses {
+			log.Println(inter.Name, ip.IP.String())
+		}
+	}
 
 	handle, err := pcap.OpenLive(
 		device,

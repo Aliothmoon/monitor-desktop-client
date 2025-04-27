@@ -10,6 +10,7 @@ require (
 	github.com/google/gopacket v1.1.19
 	github.com/segmentio/ksuid v1.0.4
 	github.com/shirou/gopsutil v2.21.11+incompatible
+	github.com/shirou/gopsutil/v3 v3.24.5
 	golang.org/x/image v0.25.0
 	golang.org/x/text v0.23.0
 )
@@ -17,6 +18,9 @@ require (
 require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
+	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
+	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
+	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/tevino/abool v0.0.0-20220530134649-2bfc934cb23c // indirect
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
