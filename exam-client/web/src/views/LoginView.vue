@@ -1,46 +1,55 @@
 <template>
   <div class="login-container">
-    <h1>考试客户端系统</h1>
-    <div class="form-group">
-      <label for="username">学号/准考证号:</label>
-      <input 
-        type="text" 
-        id="username" 
-        v-model="username" 
-        placeholder="请输入学号或准考证号"
-      >
-    </div>
-    <div class="form-group">
-      <label for="password">密码:</label>
-      <input 
-        type="password" 
-        id="password" 
-        v-model="password" 
-        placeholder="请输入密码"
-      >
-    </div>
-    <button 
-      id="loginBtn" 
-      @click="login" 
-      :disabled="isLoading"
-    >{{ isLoading ? '正在登录...' : '登录' }}</button>
-    <div v-show="isLoading" class="loading">正在登录，请稍候...</div>
-    <div class="system-info">
-      <div id="systemInfo">{{ systemInfo }}</div>
-    </div>
+    <a-card class="login-card">
+      <a-space :size="24" direction="vertical" fill>
+        <div class="title">
+          <h1>考试客户端系统</h1>
+        </div>
+
+        <a-form :model="form" layout="vertical" @submit="login">
+          <a-form-item :rules="[{ required: true, message: '请输入学号或准考证号' }]" field="username"
+                       label="学号/准考证号"
+          >
+            <a-input v-model="form.username" allow-clear placeholder="请输入学号或准考证号"/>
+          </a-form-item>
+
+          <a-form-item :rules="[{ required: true, message: '请输入密码' }]" field="password"
+                       label="密码"
+          >
+            <a-input-password v-model="form.password" allow-clear placeholder="请输入密码"/>
+          </a-form-item>
+
+          <a-form-item>
+            <a-button :loading="isLoading" html-type="submit" long type="primary">
+              {{ isLoading ? '登录中...' : '登录' }}
+            </a-button>
+          </a-form-item>
+        </a-form>
+
+        <a-alert v-if="systemInfo" type="info">
+          <template #icon>
+            <icon-computer/>
+          </template>
+          <template #message>{{ systemInfo }}</template>
+        </a-alert>
+      </a-space>
+    </a-card>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import {defineComponent, onMounted, reactive, ref} from 'vue';
+import {Message} from '@arco-design/web-vue';
 import ipcService from '../utils/ipc';
 
 export default defineComponent({
   name: 'LoginView',
   emits: ['login-success'],
-  setup(_, { emit }) {
-    const username = ref('');
-    const password = ref('');
+  setup(_, {emit}) {
+    const form = reactive({
+      username: '',
+      password: ''
+    });
     const systemInfo = ref('系统信息加载中...');
     const isLoading = ref(false);
 
@@ -54,27 +63,27 @@ export default defineComponent({
       ipcService.on('loginResult', (success, examInfo) => {
         isLoading.value = false;
         if (success) {
+          Message.success('登录成功');
           emit('login-success', examInfo);
         } else {
-          alert('登录失败，请检查用户名和密码');
+          Message.error('登录失败，请检查用户名和密码');
         }
       });
     });
 
     // 登录处理
     const login = () => {
-      if (!username.value || !password.value) {
-        alert('请输入学号/准考证号和密码');
+      if (!form.username || !form.password) {
+        Message.warning('请输入学号/准考证号和密码');
         return;
       }
-      
+
       isLoading.value = true;
-      ipcService.emit('login', username.value, password.value);
+      ipcService.emit('login', form.username, form.password);
     };
 
     return {
-      username,
-      password,
+      form,
       systemInfo,
       isLoading,
       login
@@ -85,70 +94,45 @@ export default defineComponent({
 
 <style scoped>
 .login-container {
-  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.login-card {
+  width: min(90%, 450px);
+  margin: auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 30px;
-  margin-top: 50px;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-h1 {
+.title {
   text-align: center;
   margin-bottom: 20px;
-  color: #4A90E2;
 }
 
-.form-group {
-  margin-bottom: 20px;
+.title h1 {
+  color: var(--color-text-1);
+  font-size: clamp(20px, 4vw, 26px);
+  font-weight: 500;
 }
 
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-input[type="text"], input[type="password"] {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-button {
-  background-color: #4A90E2;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  width: 100%;
-  transition: background-color 0.3s;
-}
-
-button:hover:not(:disabled) {
-  background-color: #3A7BC8;
-}
-
-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.loading {
-  text-align: center;
-  margin-top: 10px;
-  color: #4A90E2;
-}
-
-.system-info {
-  margin-top: 20px;
-  color: #666;
-  font-size: 14px;
+/* 响应式调整 */
+@media screen and (max-height: 600px) {
+  .login-card {
+    padding: 12px;
+  }
+  
+  .title {
+    margin-bottom: 10px;
+  }
+  
+  :deep(.arco-space) {
+    gap: 16px !important;
+  }
 }
 </style> 

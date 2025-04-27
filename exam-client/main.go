@@ -27,8 +27,8 @@ func main() {
 
 	// 本地资源配置
 	cef.BrowserWindow.Config.Title = "考试客户端系统"
-	cef.BrowserWindow.Config.Width = 1024
-	cef.BrowserWindow.Config.Height = 768
+	cef.BrowserWindow.Config.Width = 1700
+	cef.BrowserWindow.Config.Height = 1000
 	cef.BrowserWindow.Config.Url = "fs://energy"
 	cef.BrowserWindow.Config.LocalResource(cef.LocalLoadConfig{
 		ResRootDir: "web/dist",

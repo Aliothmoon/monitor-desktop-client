@@ -1,11 +1,11 @@
-import type { IpcCalls, IpcEvents } from '../types/ipc';
+import type {IpcCalls, IpcEvents} from '../types/ipc';
 
 // 定义全局IPC对象
 declare global {
   interface Window {
     ipc: {
       on: <K extends keyof IpcEvents>(channel: K, callback: IpcEvents[K]) => void;
-      emit: <K extends keyof IpcCalls>(channel: K, args: Array<any>) => void;
+      emit: <K extends keyof IpcCalls>(channel: K, args: any[]) => void;
     }
   }
 }
