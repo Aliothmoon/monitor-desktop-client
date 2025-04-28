@@ -29,6 +29,21 @@ class IpcService {
       console.error('IPC不可用，可能在浏览器环境中运行');
     }
   }
+
+  // 用户登录
+  login(username: string, password: string): void {
+    this.emit('login', username, password);
+  }
+
+  // 打开浏览器
+  openBrowser(): void {
+    this.emit('openBrowser');
+  }
+  
+  // 用户登出
+  logout(): void {
+    this.emit('logout');
+  }
 }
 
 export default new IpcService(); 

@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <LoginView v-if="!isLoggedIn" @login-success="handleLoginSuccess"/>
-    <ExamView v-else :examInfo="examInfo"/>
+    <ExamView v-else :examInfo="examInfo" @logout="handleLogout"/>
   </div>
 </template>
 
@@ -33,10 +33,15 @@ export default defineComponent({
       isLoggedIn.value = true;
     };
 
+    const handleLogout = () => {
+      isLoggedIn.value = false;
+    };
+
     return {
       isLoggedIn,
       examInfo,
-      handleLoginSuccess
+      handleLoginSuccess,
+      handleLogout
     };
   }
 });

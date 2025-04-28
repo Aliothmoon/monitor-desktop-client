@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <a-card class="login-card">
-      <a-space :size="24" direction="vertical" fill>
+      <a-space :size="20" direction="vertical" fill>
         <div class="title">
           <h1>考试客户端系统</h1>
         </div>
@@ -26,70 +26,129 @@
           </a-form-item>
         </a-form>
 
-        <a-alert v-if="systemInfo" type="info">
+        <a-alert v-if="systemInfo" class="system-info" type="info">
           <template #icon>
             <icon-computer/>
           </template>
-          <template #message>{{ systemInfo }}</template>
+          <template #title>设备信息</template>
+          <div class="device-info">
+            <div class="info-item" v-if="deviceInfo.platform">
+              <span class="info-label">系统:</span>
+              <span class="info-value">{{ deviceInfo.platform }}</span>
+            </div>
+            <div class="info-item" v-if="deviceInfo.hostname">
+              <span class="info-label">主机名:</span>
+              <span class="info-value">{{ deviceInfo.hostname }}</span>
+            </div>
+            <div class="info-item" v-if="deviceInfo.kernelArch">
+              <span class="info-label">架构:</span>
+              <span class="info-value">{{ deviceInfo.kernelArch }}</span>
+            </div>
+            <div class="info-item" v-if="deviceInfo.uptime">
+              <span class="info-label">运行时间:</span>
+              <span class="info-value">{{ formatUptime(deviceInfo.uptime) }}</span>
+            </div>
+            <div class="info-item" v-if="deviceInfo.procs">
+              <span class="info-label">进程数:</span>
+              <span class="info-value">{{ deviceInfo.procs }}</span>
+            </div>
+            <div class="info-item" v-if="deviceInfo.kernelVersion">
+              <span class="info-label">内核版本:</span>
+              <span class="info-value">{{ deviceInfo.kernelArch }}</span>
+            </div>
+          </div>
         </a-alert>
       </a-space>
     </a-card>
   </div>
 </template>
 
-<script lang="ts">
-import {defineComponent, onMounted, reactive, ref} from 'vue';
+<script setup lang="ts">
+import {onMounted, reactive, ref} from 'vue';
 import {Message} from '@arco-design/web-vue';
 import ipcService from '../utils/ipc';
+import type {IExamInfo} from '../types/ipc';
 
-export default defineComponent({
-  name: 'LoginView',
-  emits: ['login-success'],
-  setup(_, {emit}) {
-    const form = reactive({
-      username: '',
-      password: ''
-    });
-    const systemInfo = ref('系统信息加载中...');
-    const isLoading = ref(false);
+interface DeviceInfo {
+  hostname: string;
+  uptime: number;
+  bootTime: number;
+  procs: number;
+  os: string;
+  platform: string;
+  platformFamily: string;
+  platformVersion: string;
+  kernelVersion: string;
+  kernelArch: string;
+  virtualizationSystem: string;
+  virtualizationRole: string;
+  hostId: string;
+}
 
-    // 监听系统信息
-    onMounted(() => {
-      ipcService.on('systemInfo', (info) => {
-        systemInfo.value = info;
-      });
+const emit = defineEmits<{
+  (e: 'login-success', examInfo: IExamInfo): void
+}>();
 
-      // 监听登录结果
-      ipcService.on('loginResult', (success, examInfo) => {
-        isLoading.value = false;
-        if (success) {
-          Message.success('登录成功');
-          emit('login-success', examInfo);
-        } else {
-          Message.error('登录失败，请检查用户名和密码');
-        }
-      });
-    });
-
-    // 登录处理
-    const login = () => {
-      if (!form.username || !form.password) {
-        Message.warning('请输入学号/准考证号和密码');
-        return;
-      }
-
-      isLoading.value = true;
-      ipcService.emit('login', form.username, form.password);
-    };
-
-    return {
-      form,
-      systemInfo,
-      isLoading,
-      login
-    };
-  }
+const form = reactive({
+  username: '',
+  password: ''
 });
+const systemInfo = ref<string>('系统信息加载中...');
+const deviceInfo = ref<DeviceInfo>({} as DeviceInfo);
+const isLoading = ref(false);
+
+// 格式化运行时间
+const formatUptime = (seconds: number): string => {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+
+  const parts = [];
+  if (days > 0) parts.push(`${days}天`);
+  if (hours > 0) parts.push(`${hours}小时`);
+  if (minutes > 0) parts.push(`${minutes}分钟`);
+
+  return parts.join(' ');
+};
+
+// 监听系统信息
+onMounted(() => {
+  ipcService.emit('load')
+  ipcService.on('systemInfo', (info) => {
+    console.log('systemInfo', info);
+    try {
+      // 解析JSON数据
+      deviceInfo.value = JSON.parse(info);
+      systemInfo.value = info; // 保留原始信息
+    } catch (e) {
+      // 如果解析失败，直接显示原始信息
+      systemInfo.value = info;
+    }
+  });
+
+  // 监听登录结果
+  ipcService.on('loginResult', (success, examInfo) => {
+    console.log('loginResult', success, examInfo);
+    isLoading.value = false;
+    if (success) {
+      Message.success('登录成功');
+      emit('login-success', examInfo);
+    } else {
+      Message.error('登录失败，请检查用户名和密码');
+    }
+  });
+});
+
+// 登录处理
+const login = () => {
+  if (!form.username || !form.password) {
+    Message.warning('请输入学号/准考证号和密码');
+    return;
+  }
+
+  isLoading.value = true;
+  ipcService.emit('login', form.username, form.password);
+};
 </script>
 
 <style scoped>
@@ -99,15 +158,18 @@ export default defineComponent({
   align-items: center;
   width: 100%;
   height: 100%;
+  padding: 20px;
+  overflow-y: auto;
 }
 
 .login-card {
-  width: min(90%, 450px);
+  width: min(90%, 500px);
   margin: auto;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  overflow: hidden;
   transition: all 0.3s ease;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .title {
@@ -121,18 +183,56 @@ export default defineComponent({
   font-weight: 500;
 }
 
+.system-info {
+  width: 100%;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.device-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.info-item {
+  display: flex;
+}
+
+.info-label {
+  flex: 0 0 80px;
+  font-weight: 500;
+  color: var(--color-text-2);
+}
+
+.info-value {
+  flex: 1;
+  word-break: break-word;
+}
+
+:deep(.arco-alert-content-message) {
+  white-space: normal;
+  word-break: break-word;
+}
+
 /* 响应式调整 */
 @media screen and (max-height: 600px) {
+  .login-container {
+    align-items: flex-start;
+    padding-top: 10px;
+  }
+
   .login-card {
     padding: 12px;
+    margin-top: 0;
   }
-  
+
   .title {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
-  
+
   :deep(.arco-space) {
-    gap: 16px !important;
+    gap: 12px !important;
   }
 }
 </style> 

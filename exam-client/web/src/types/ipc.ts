@@ -26,6 +26,8 @@ export interface IpcEvents {
 
 // 定义IPC调用类型
 export interface IpcCalls {
+  'load': () => void
   'login': (username: string, password: string) => void;
-  'openBrowser': (url: string) => void;
+  'openBrowser': () => void;
+  'logout': () => void;
 } 
