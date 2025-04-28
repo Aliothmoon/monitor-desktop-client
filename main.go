@@ -39,6 +39,8 @@ func main() {
 
 // 配置应用程序
 func setupAppConfig() {
+
+	cef.BrowserWindow.Config.IconFS = "web/dist/icon.ico"
 	// 本地资源配置
 	cef.BrowserWindow.Config.Title = "考试客户端系统"
 	cef.BrowserWindow.Config.Width = 1700

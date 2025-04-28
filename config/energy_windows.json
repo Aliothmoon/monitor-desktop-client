@@ -12,9 +12,9 @@
     "productName": "monitor-desktop-client",
     "fileVersion": "1.0.0",
     "productVersion": "1.0.0",
-    "copyright": "Copyright.....",
-    "comments": "Built using ENERGY (https://github.com/energye/energy)",
-    "fileDescription": "Built using ENERGY (https://github.com/energye/energy)"
+    "copyright": "Copyright Alioth",
+    "comments": "Built using ENERGY",
+    "fileDescription": "Built using ENERGY"
   },
   "nsis": {
     "include": [],
@@ -29,7 +29,7 @@
     "compressName": "framework.7z"
   },
   "author": {
-    "name": "yanghy",
-    "email": "snxamdf@126.com"
+    "name": "Alioth",
+    "email": "aliothmoon@outlook.com"
   }
 }
