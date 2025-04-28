@@ -19,7 +19,7 @@
         </a-button>
       </div>
 
-      <a-descriptions :data="examInfoData" bordered layout="inline-vertical" size="large" title="考试信息"/>
+      <a-descriptions :data="examInfoData" bordered size="large" title="考试信息"/>
 
       <!-- 打开浏览器按钮区域 -->
       <div class="browser-actions">

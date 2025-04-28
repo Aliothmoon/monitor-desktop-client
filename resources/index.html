@@ -1,64 +1,329 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Go Energy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考试客户端系统</title>
     <style>
-        .logo {
-            width: 300px;
-            height: 300px;
-            margin: 40px auto 0;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-
-        .logo img {
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .login-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 50px;
+        }
+        .exam-container {
+            display: none;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4A90E2;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="password"] {
             width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
         }
-
-        .module {
+        button {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3A7BC8;
+        }
+        .info-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #4A90E2;
+        }
+        .system-info {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        .countdown {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
             text-align: center;
-            padding: 0 20px;
-            margin: 0px auto;
-            color: #000;
+            margin: 20px 0;
         }
-
-        .module .content {
-            margin-right: 20px;
+        .exam-info {
+            margin-bottom: 20px;
+        }
+        .exam-info p {
+            margin: 5px 0;
+        }
+        .browser-container {
+            margin-top: 20px;
             text-align: center;
         }
-
-        .module p {
-            color: #999;
+        .browser-container button {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        .process-info {
+            margin-top: 20px;
+        }
+        .process-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .process-table th, .process-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .process-table th {
+            background-color: #f2f2f2;
+        }
+        .https-info {
+            margin-top: 20px;
+        }
+        .https-visits {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-<div class="logo">
-    <img src="icon.png">
-</div>
-<div class="module">
-    <div class="content">
-        <p style="font-weight: bold; font-size: 14px; color: #000;">Welcome to your new project!</p>
-        <p>OS Info: <span id="osInfo">--</span></p>
+    <div class="container">
+        <!-- 登录页面 -->
+        <div id="loginContainer" class="login-container">
+            <h1>考试客户端系统</h1>
+            <div class="form-group">
+                <label for="username">学号/准考证号:</label>
+                <input type="text" id="username" name="username" placeholder="请输入学号或准考证号">
+            </div>
+            <div class="form-group">
+                <label for="password">密码:</label>
+                <input type="password" id="password" name="password" placeholder="请输入密码">
+            </div>
+            <button id="loginBtn" onclick="login()">登录</button>
+            <div id="loading" class="loading">正在登录，请稍候...</div>
+            <div class="system-info">
+                <div id="systemInfo">系统信息加载中...</div>
+            </div>
+        </div>
+
+        <!-- 考试信息页面 -->
+        <div id="examContainer" class="exam-container">
+            <h2 id="examTitle">考试名称</h2>
+            <div class="countdown" id="countdown">剩余时间: 00:00:00</div>
+            <div class="exam-info" id="examInfo">
+                <p>考试编号: <span id="examId"></span></p>
+                <p>开始时间: <span id="startTime"></span></p>
+                <p>结束时间: <span id="endTime"></span></p>
+                <p>考生姓名: <span id="studentName"></span></p>
+            </div>
+            <div class="browser-container">
+                <button onclick="openBrowser()">打开考试浏览器</button>
+            </div>
+            <div class="info-box">
+                <div class="process-info">
+                    <h3>系统进程信息</h3>
+                    <table class="process-table" id="processTable">
+                        <thead>
+                            <tr>
+                                <th>PID</th>
+                                <th>进程名</th>
+                                <th>内存使用(MB)</th>
+                                <th>CPU使用(%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="processBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center;">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="https-info">
+                    <h3>浏览器访问记录</h3>
+                    <div class="https-visits" id="httpsVisits">
+                        无访问记录
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="content">
-        <p style="font-weight: bold; font-size: 14px; color: #000">Getting start</p>
-        <a href="https://github.com/energye/energy">Github</a>
-        <a href="https://energye.github.io/course/what-is-energy">Course</a>
-        <a href="https://energye.github.io/examples">Example</a>
-        <a href="https://energye.github.io/document">Document</a>
-    </div>
-</div>
-<script>
-    // js on osInfo
-    ipc.on("osInfo", function (os) {
-        document.getElementById("osInfo").innerText = os;
-    });
-    // js emit send count++
-    let count = 0;
-    setInterval(function () {
-        count++
-        ipc.emit("count", [count]);
-    }, 1000)
-</script>
+
+    <script>
+        let examEndTime = null;
+        let countdownInterval = null;
+        const visitedUrls = new Set();
+
+        // 监听系统信息
+        ipc.on("systemInfo", function(info) {
+            document.getElementById("systemInfo").innerText = info;
+        });
+
+        // 监听进程信息
+        ipc.on("processInfo", function(processes) {
+            const tbody = document.getElementById("processBody");
+            tbody.innerHTML = "";
+
+            processes.forEach(proc => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${proc.pid}</td>
+                    <td>${proc.name}</td>
+                    <td>${proc.memory}</td>
+                    <td>${proc.cpu.toFixed(2)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
+
+        // 监听浏览器访问
+        ipc.on("browserVisit", function(url) {
+            const httpsVisits = document.getElementById("httpsVisits");
+            if (visitedUrls.has(url)) return;
+            
+            visitedUrls.add(url);
+            const timestamp = new Date().toLocaleTimeString();
+            httpsVisits.innerHTML = `<div>${timestamp} - ${url}</div>` + httpsVisits.innerHTML;
+        });
+
+        // 登录处理
+        function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            if (!username || !password) {
+                alert("请输入学号/准考证号和密码");
+                return;
+            }
+
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("loginBtn").disabled = true;
+
+            // 发送登录请求
+            ipc.emit("login", [username, password]);
+        }
+
+        // 登录结果处理
+        ipc.on("loginResult", function(success, examInfo) {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("loginBtn").disabled = false;
+
+            if (success) {
+                showExamInfo(examInfo);
+            } else {
+                alert("登录失败，请检查学号/准考证号和密码是否正确");
+            }
+        });
+
+        // 显示考试信息
+        function showExamInfo(examInfo) {
+            document.getElementById("loginContainer").style.display = "none";
+            document.getElementById("examContainer").style.display = "block";
+
+            document.getElementById("examTitle").innerText = examInfo.title;
+            document.getElementById("examId").innerText = examInfo.examId;
+            document.getElementById("startTime").innerText = examInfo.startTime;
+            document.getElementById("endTime").innerText = examInfo.endTime;
+            document.getElementById("studentName").innerText = examInfo.studentName;
+
+            // 设置结束时间
+            examEndTime = new Date(examInfo.endTime);
+            
+            // 启动倒计时
+            startCountdown();
+        }
+
+        // 开始倒计时
+        function startCountdown() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
+            countdownInterval = setInterval(updateCountdown, 1000);
+            updateCountdown();
+        }
+
+        // 更新倒计时
+        function updateCountdown() {
+            const now = new Date();
+            const diff = examEndTime - now;
+
+            if (diff <= 0) {
+                clearInterval(countdownInterval);
+                document.getElementById("countdown").innerText = "考试已结束";
+                return;
+            }
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById("countdown").innerText = 
+                `剩余时间: ${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(seconds)}`;
+        }
+
+        // 格式化数字为两位数
+        function formatNumber(num) {
+            return num < 10 ? `0${num}` : num;
+        }
+
+        // 打开浏览器
+        function openBrowser() {
+            // 这里可以设置考试URL
+            ipc.emit("openBrowser", ["https://www.baidu.com"]);
+        }
+    </script>
 </body>
-</html>
+</html> 
