@@ -10,6 +10,7 @@ import (
 	"github.com/google/gopacket/tcpassembly"
 	"github.com/google/gopacket/tcpassembly/tcpreader"
 	"log"
+	"monitor-desktop-client/utils"
 	"time"
 )
 
@@ -85,12 +86,12 @@ func OpenLive(device string) {
 	}
 }
 
-func (s *SniStreamFactory) New(netFlow, tcpFlow gopacket.Flow) tcpassembly.Stream {
+func (s *SniStreamFactory) New(netFlow, _ gopacket.Flow) tcpassembly.Stream {
 	stream := &SniStream{}
 	r := tcpreader.NewReaderStream()
 
 	// 异步处理重组后的流数据
-	go func() {
+	utils.Go(func() {
 		buf := make([]byte, 4096)
 		for {
 			n, err := r.Read(buf)
@@ -99,17 +100,16 @@ func (s *SniStreamFactory) New(netFlow, tcpFlow gopacket.Flow) tcpassembly.Strea
 			}
 			stream.bytes = append(stream.bytes, buf[:n]...)
 			// 尝试解析SNI
-			if sni, ok := extractSNI(stream.bytes); ok && !stream.done {
+			if sni, ok := processDataHead(stream.bytes); ok && !stream.done {
 				fmt.Printf("[SNI] %s (From: %s)\n", sni, netFlow)
 				stream.done = true
 			}
 		}
-	}()
+	})
 	return &r
 }
 
-// 改进的SNI解析函数
-func extractSNI(data []byte) (string, bool) {
+func processDataHead(data []byte) (string, bool) {
 	r := bytes.NewReader(data)
 
 	// TLS记录头
@@ -236,33 +236,4 @@ func extractSNI(data []byte) (string, bool) {
 	}
 
 	return "", false
-}
-
-// 辅助函数：选择网卡
-func selectDevice() string {
-	devices, err := pcap.FindAllDevs()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// 打印可用网卡
-	fmt.Println("Available interfaces:")
-	for i, dev := range devices {
-		fmt.Printf("[%d] %s", i+1, dev.Name)
-		if len(dev.Description) > 0 {
-			fmt.Printf(" - %s", dev.Description)
-		}
-		fmt.Println()
-	}
-
-	// 选择第一个有IP地址的网卡
-	for _, dev := range devices {
-		if len(dev.Addresses) > 0 {
-			fmt.Printf("\nAuto-selected interface: %s\n", dev.Name)
-			return dev.Name
-		}
-	}
-
-	log.Fatal("No available interfaces with IP addresses")
-	return ""
 }

@@ -7,6 +7,7 @@ import (
 	"monitor-desktop-client/devices"
 	"monitor-desktop-client/foreground"
 	"monitor-desktop-client/netcap"
+	"monitor-desktop-client/utils"
 	"strings"
 	"syscall"
 	"time"
@@ -14,13 +15,14 @@ import (
 
 func main() {
 	fmt.Println("程序启动，测试窗口监控功能...")
+	// 硬件信息可选测试
+	GetHardwareInfo()
+
 	WatchNetworkInfo()
 
 	// 窗口监控测试
 	MonitorForegroundWindow()
 
-	// 硬件信息可选测试
-	// GetHardwareInfo()
 }
 
 func WatchNetworkInfo() {
@@ -42,7 +44,9 @@ func WatchNetworkInfo() {
 		}
 	}
 	for _, d := range ds {
-		go netcap.OpenLive(d)
+		utils.Go(func() {
+			netcap.OpenLive(d)
+		})
 	}
 
 }

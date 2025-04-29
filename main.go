@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"monitor-desktop-client/utils"
 	"time"
 
 	"github.com/energye/energy/v2/cef"
@@ -252,7 +253,7 @@ func registerUSBMonitorEvent() {
 	})
 
 	// 启动定时监控USB设备
-	go monitorUSBDevices()
+	utils.Go(monitorUSBDevices)
 }
 
 // 监控USB设备变化

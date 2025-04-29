@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gorilla/websocket"
 	"github.com/jpillora/backoff"
+	"monitor-desktop-client/utils"
 	"net/http"
 	"sync"
 	"time"
@@ -214,7 +215,7 @@ func (wsc *Wsc) Connect() {
 			return defaultPongHandler(appData)
 		})
 		// 开启协程读
-		go func() {
+		utils.Go(func() {
 			for {
 				messageType, message, err := wsc.WebSocket.Conn.ReadMessage()
 				if err != nil {
@@ -240,9 +241,9 @@ func (wsc *Wsc) Connect() {
 					break
 				}
 			}
-		}()
+		})
 		// 开启协程写
-		go func() {
+		utils.Go(func() {
 			for {
 				select {
 				case wsMsg, ok := <-wsc.WebSocket.sendChan:
@@ -272,7 +273,7 @@ func (wsc *Wsc) Connect() {
 					}
 				}
 			}
-		}()
+		})
 		return
 	}
 }
@@ -336,7 +337,7 @@ func (wsc *Wsc) closeAndRecConn() {
 		return
 	}
 	wsc.clean()
-	go wsc.Connect()
+	utils.Go(wsc.Connect)
 }
 
 // Close 主动关闭连接
