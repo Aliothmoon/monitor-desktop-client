@@ -293,7 +293,7 @@ func getMACAddresses() []string {
 
 	for _, iface := range interfaces {
 		// 排除虚拟接口和回环接口
-		if iface.Flags&net.FlagLoopback == 0 && !isVirtualInterface(iface.Name) && len(iface.HardwareAddr) > 0 {
+		if iface.Flags&net.FlagLoopback == 0 && !IsVirtualInterface(iface.Name) && len(iface.HardwareAddr) > 0 {
 			macAddresses = append(macAddresses, iface.HardwareAddr.String())
 		}
 	}
@@ -301,8 +301,8 @@ func getMACAddresses() []string {
 	return macAddresses
 }
 
-// isVirtualInterface 检查是否是虚拟网络接口
-func isVirtualInterface(name string) bool {
+// IsVirtualInterface 检查是否是虚拟网络接口
+func IsVirtualInterface(name string) bool {
 	// 常见虚拟接口名称标识
 	virtualPrefixes := []string{
 		"vethernet", "veth", "vmnet", "vboxnet",
