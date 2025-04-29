@@ -1,6 +1,7 @@
 <template>
   <div class="app">
     <LoginView v-if="!isLoggedIn" @login-success="handleLoginSuccess"/>
+    <PreExamCheck v-else-if="isLoggedIn && !passedPreCheck" :examInfo="examInfo" @check-complete="handleCheckComplete" />
     <ExamView v-else :examInfo="examInfo" @logout="handleLogout"/>
   </div>
 </template>
@@ -9,16 +10,19 @@
 import {defineComponent, ref} from 'vue';
 import LoginView from './views/LoginView.vue';
 import ExamView from './views/ExamView.vue';
+import PreExamCheck from './views/PreExamCheck.vue';
 import type {IExamInfo} from './types/ipc';
 
 export default defineComponent({
   name: 'App',
   components: {
     LoginView,
-    ExamView
+    ExamView,
+    PreExamCheck
   },
   setup() {
     const isLoggedIn = ref(false);
+    const passedPreCheck = ref(false);
     const examInfo = ref<IExamInfo>({
       examId: '',
       title: '',
@@ -33,14 +37,21 @@ export default defineComponent({
       isLoggedIn.value = true;
     };
 
+    const handleCheckComplete = () => {
+      passedPreCheck.value = true;
+    };
+
     const handleLogout = () => {
       isLoggedIn.value = false;
+      passedPreCheck.value = false;
     };
 
     return {
       isLoggedIn,
+      passedPreCheck,
       examInfo,
       handleLoginSuccess,
+      handleCheckComplete,
       handleLogout
     };
   }
