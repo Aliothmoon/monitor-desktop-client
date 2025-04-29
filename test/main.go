@@ -7,6 +7,7 @@ import (
 	"monitor-desktop-client/devices"
 	"monitor-desktop-client/foreground"
 	"monitor-desktop-client/netcap"
+	"monitor-desktop-client/screencap"
 	"monitor-desktop-client/utils"
 	"strings"
 	"syscall"
@@ -68,6 +69,7 @@ func GetHardwareInfo() {
 func MonitorForegroundWindow() {
 	var prev syscall.Handle = 0
 
+	throttler := utils.NewAdvancedThrottler(time.Second * 3)
 	for {
 		info := foreground.GetWindowInfo()
 		if info == nil {
@@ -75,6 +77,9 @@ func MonitorForegroundWindow() {
 		}
 		if info.Handle != prev {
 			fmt.Printf("焦点切换 -> 进程: %-20s PID: %-6d 窗口: %-50s 路径: %s\n", info.ProcessName, info.ProcessID, info.Title, info.ProcessPath)
+			throttler.Do(func() {
+				screencap.SaveTestCap()
+			})
 			prev = info.Handle
 		}
 
