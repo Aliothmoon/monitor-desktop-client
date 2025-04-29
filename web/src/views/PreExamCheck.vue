@@ -261,26 +261,27 @@ const enterExam = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: min(20px, 3vw);
   overflow-y: auto;
 }
 
 .check-card {
   width: min(90%, 800px);
   margin: auto;
-  max-height: 90vh;
+  max-height: min(90vh, 900px);
   overflow-y: auto;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: min(16px, 2vh);
 }
 
 .header h1 {
-  margin-bottom: 20px;
-  font-size: clamp(20px, 4vw, 24px);
+  margin-bottom: min(20px, 3vh);
+  font-size: clamp(18px, 3vw, 24px);
   color: var(--color-text-1);
+  line-height: 1.3;
 }
 
 /* 诚信承诺样式 */
@@ -290,8 +291,8 @@ const enterExam = () => {
 }
 
 .commitment-content {
-  height: 350px;
-  margin-bottom: 20px;
+  height: clamp(250px, 50vh, 400px);
+  margin-bottom: min(20px, 3vh);
   border: 1px solid var(--color-border-2);
   border-radius: 4px;
   background-color: var(--color-fill-2);
@@ -299,8 +300,9 @@ const enterExam = () => {
 }
 
 .commitment-text {
-  padding: 16px;
+  padding: min(16px, 3vw);
   line-height: 1.6;
+  font-size: clamp(14px, 1.6vw, 16px);
 }
 
 .commitment-text p {
@@ -316,8 +318,8 @@ const enterExam = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  margin-top: 16px;
+  gap: min(16px, 2vh);
+  margin-top: min(16px, 2vh);
 }
 
 /* 设备检测样式 */
@@ -336,6 +338,8 @@ const enterExam = () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .check-title {
@@ -347,6 +351,7 @@ const enterExam = () => {
 .check-description {
   color: var(--color-text-3);
   margin-bottom: 16px;
+  font-size: clamp(13px, 1.5vw, 14px);
 }
 
 .check-action {
@@ -359,23 +364,24 @@ const enterExam = () => {
 .navigation-buttons {
   display: flex;
   justify-content: flex-end;
-  margin-top: 24px;
+  margin-top: min(24px, 3vh);
 }
 
 /* 完成界面 */
 .complete-section {
-  padding: 20px 0;
+  padding: min(20px, 3vh) 0;
 }
 
-/* 响应式调整 */
+/* 更强的响应式调整 */
 @media screen and (max-width: 768px) {
   .pre-exam-check {
     padding: 12px;
+    align-items: flex-start;
   }
   
   .header h1 {
-    font-size: 20px;
-    margin-bottom: 16px;
+    font-size: 18px;
+    margin-bottom: 12px;
   }
   
   .agreement-section {
@@ -383,26 +389,123 @@ const enterExam = () => {
   }
   
   .commitment-content {
-    height: 300px;
+    height: 40vh;
+  }
+  
+  .commitment-text {
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  :deep(.arco-steps-label-horizontal) {
+    flex-wrap: nowrap;
+  }
+  
+  :deep(.arco-list-header) {
+    padding: 8px 0;
+  }
+  
+  :deep(.arco-list-item) {
+    padding: 8px 0;
+  }
+  
+  :deep(.arco-card-body) {
+    padding: 12px;
+  }
+  
+  :deep(.arco-typography-title-5),
+  :deep(.arco-typography-title-6) {
+    font-size: 16px;
+    margin-top: 0;
+  }
+  
+  :deep(.arco-tag) {
+    font-size: 12px;
+  }
+  
+  :deep(.arco-result-title) {
+    font-size: 18px;
+  }
+  
+  :deep(.arco-result-subtitle) {
+    font-size: 14px;
   }
 }
 
 @media screen and (max-height: 700px) {
   .pre-exam-check {
     align-items: flex-start;
-    padding-top: 10px;
+    padding-top: 8px;
   }
   
   .check-card {
     margin: 0 auto;
+    max-height: 95vh;
   }
   
   .commitment-content {
-    height: 250px;
+    height: 40vh;
   }
   
   .commitment-text {
     padding: 12px;
+  }
+  
+  :deep(.arco-space) {
+    gap: 12px !important;
+  }
+  
+  :deep(.arco-steps) {
+    margin-bottom: 8px;
+  }
+  
+  .header h1 {
+    margin-bottom: 10px;
+  }
+}
+
+/* 超小屏幕 */
+@media screen and (max-width: 480px) {
+  .pre-exam-check {
+    padding: 8px;
+  }
+  
+  .check-card {
+    width: 95%;
+  }
+  
+  :deep(.arco-typography-title-5) {
+    font-size: 16px;
+  }
+  
+  :deep(.arco-steps-item-title) {
+    font-size: 12px;
+  }
+  
+  .commitment-text {
+    font-size: 13px;
+  }
+  
+  :deep(.arco-card-body) {
+    padding: 10px;
+  }
+  
+  .check-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  :deep(.arco-btn) {
+    font-size: 13px;
+    padding: 0 10px;
+    height: 30px;
+  }
+}
+
+/* 高屏幕 */
+@media screen and (min-height: 1000px) {
+  .commitment-content {
+    height: 500px;
   }
 }
 </style> 

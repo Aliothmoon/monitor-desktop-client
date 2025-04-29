@@ -334,7 +334,7 @@ const emit = defineEmits<{
 .exam-container {
   width: 100%;
   height: 100vh;
-  padding: 20px;
+  padding: min(20px, 3vw);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -343,22 +343,22 @@ const emit = defineEmits<{
 .exam-card {
   flex: 1;
   overflow: auto;
-  margin-bottom: 20px;
+  margin-bottom: min(20px, 3vh);
 }
 
 .card-title {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 15px 20px;
+  gap: min(12px, 2vh);
+  padding: min(15px, 2vw) min(20px, 3vw);
   width: 100%;
-  min-height: 90px;
+  min-height: min(90px, 15vh);
 }
 
 .exam-title {
   margin: 0;
-  font-size: 24px;
+  font-size: clamp(18px, 3vw, 24px);
   color: var(--color-text-1);
   font-weight: 500;
   text-align: center;
@@ -366,30 +366,30 @@ const emit = defineEmits<{
   overflow-wrap: break-word;
   word-break: break-word;
   line-height: 1.4;
-  padding: 0 10px;
+  padding: 0 min(10px, 2vw);
   max-width: 100%;
   hyphens: auto;
 }
 
 .countdown {
-  font-size: 18px;
+  font-size: clamp(16px, 2.5vw, 18px);
   font-weight: bold;
-  margin-top: 5px;
+  margin-top: min(5px, 1vh);
 }
 
 /* 退出登录按钮样式 */
 .logout-btn {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: min(16px, 3vh);
+  right: min(16px, 3vw);
   z-index: 10;
 }
 
 /* 浏览器操作区域样式 */
 .browser-actions {
-  margin-top: 24px;
-  margin-bottom: 16px;
-  padding: 16px;
+  margin-top: min(24px, 3vh);
+  margin-bottom: min(16px, 2vh);
+  padding: min(16px, 3vw);
   background-color: var(--color-fill-1);
   border-radius: 4px;
 }
@@ -397,7 +397,7 @@ const emit = defineEmits<{
 .browser-input-group {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: min(16px, 2vh);
 }
 
 .browser-visits-collapse {
@@ -405,11 +405,11 @@ const emit = defineEmits<{
 }
 
 .exam-tabs {
-  margin-top: 16px;
+  margin-top: min(16px, 2vh);
 }
 
 .content-card {
-  margin-top: 16px;
+  margin-top: min(16px, 2vh);
 }
 
 /* 行为监控样式 */
@@ -423,20 +423,23 @@ const emit = defineEmits<{
 
 .behavior-time {
   color: var(--color-text-3);
-  min-width: 80px;
+  min-width: clamp(70px, 20%, 80px);
+  font-size: clamp(13px, 1.5vw, 14px);
 }
 
 .behavior-type {
-  min-width: 60px;
+  min-width: clamp(50px, 15%, 60px);
+  font-size: clamp(13px, 1.5vw, 14px);
 }
 
 .behavior-content {
   flex: 1;
   word-break: break-word;
+  font-size: clamp(13px, 1.5vw, 14px);
 }
 
 .behavior-summary {
-  margin-top: 16px;
+  margin-top: min(16px, 2vh);
 }
 
 :deep(.arco-card-header) {
@@ -449,6 +452,49 @@ const emit = defineEmits<{
   overflow: visible;
   white-space: normal;
   text-overflow: clip;
+  font-size: clamp(15px, 2vw, 16px);
+}
+
+:deep(.arco-descriptions-title) {
+  font-size: clamp(15px, 2vw, 16px);
+  margin-bottom: min(16px, 2vh);
+}
+
+:deep(.arco-descriptions-item-label),
+:deep(.arco-descriptions-item-value) {
+  font-size: clamp(13px, 1.5vw, 14px);
+  padding: min(8px, 1vw) min(12px, 1.5vw);
+}
+
+:deep(.arco-tabs-tab) {
+  font-size: clamp(14px, 1.6vw, 16px);
+}
+
+:deep(.arco-card-body) {
+  padding: min(16px, 3vw);
+}
+
+:deep(.arco-table-th) {
+  font-size: clamp(13px, 1.5vw, 14px);
+  padding: min(8px, 1vw);
+}
+
+:deep(.arco-table-td) {
+  font-size: clamp(13px, 1.5vw, 14px);
+  padding: min(8px, 1vw);
+}
+
+:deep(.arco-collapse-item-header-title) {
+  font-size: clamp(14px, 1.6vw, 15px);
+}
+
+:deep(.arco-statistic-title) {
+  font-size: clamp(13px, 1.5vw, 14px);
+  margin-bottom: 4px;
+}
+
+:deep(.arco-statistic-value) {
+  font-size: clamp(20px, 3vw, 24px);
 }
 
 /* 适配小屏幕 */
@@ -465,7 +511,7 @@ const emit = defineEmits<{
   }
 
   .exam-title {
-    font-size: 20px;
+    font-size: 18px;
     line-height: 1.3;
   }
 
@@ -490,6 +536,101 @@ const emit = defineEmits<{
   .logout-btn {
     top: 8px;
     right: 8px;
+  }
+  
+  :deep(.arco-tabs-tab) {
+    padding: 8px 12px;
+  }
+  
+  :deep(.arco-collapse-item-header) {
+    padding: 8px 12px;
+  }
+  
+  :deep(.arco-collapse-item-content-box) {
+    padding: 8px;
+  }
+  
+  :deep(.arco-row) {
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+  }
+  
+  :deep(.arco-col) {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
+
+/* 超小屏幕 */
+@media screen and (max-width: 480px) {
+  .exam-container {
+    padding: 8px;
+  }
+  
+  .card-title {
+    padding: 8px;
+    min-height: 60px;
+  }
+  
+  .exam-title {
+    font-size: 16px;
+  }
+  
+  .countdown {
+    font-size: 14px;
+  }
+  
+  .logout-btn button {
+    padding: 0 6px;
+    font-size: 12px;
+  }
+  
+  :deep(.arco-tabs-nav-tab-list) {
+    padding: 0 6px;
+  }
+  
+  :deep(.arco-tabs-tab) {
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  
+  :deep(.arco-statistic-value) {
+    font-size: 18px;
+  }
+  
+  :deep(.arco-descriptions-title) {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  
+  :deep(.arco-table-th),
+  :deep(.arco-table-td) {
+    padding: 6px;
+    font-size: 12px;
+  }
+  
+  :deep(.arco-empty-description) {
+    font-size: 12px;
+  }
+}
+
+/* 宽屏显示 */
+@media screen and (min-width: 1440px) {
+  .exam-container {
+    padding: 30px;
+  }
+  
+  .card-title {
+    gap: 16px;
+    padding: 20px 30px;
+  }
+  
+  .exam-title {
+    font-size: 28px;
+  }
+  
+  .countdown {
+    font-size: 20px;
   }
 }
 </style> 

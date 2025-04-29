@@ -158,7 +158,7 @@ const login = () => {
   align-items: center;
   width: 100%;
   height: 100%;
-  padding: 20px;
+  padding: min(20px, 3vw);
   overflow-y: auto;
 }
 
@@ -168,19 +168,20 @@ const login = () => {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   transition: all 0.3s ease;
-  max-height: 90vh;
+  max-height: min(90vh, 800px);
   overflow-y: auto;
 }
 
 .title {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: min(20px, 3vh);
 }
 
 .title h1 {
   color: var(--color-text-1);
-  font-size: clamp(20px, 4vw, 26px);
+  font-size: clamp(18px, 3vw, 26px);
   font-weight: 500;
+  line-height: 1.3;
 }
 
 .system-info {
@@ -197,17 +198,21 @@ const login = () => {
 
 .info-item {
   display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
 }
 
 .info-label {
-  flex: 0 0 80px;
+  flex: 0 0 min(80px, 30%);
   font-weight: 500;
   color: var(--color-text-2);
+  font-size: clamp(13px, 1.5vw, 14px);
 }
 
 .info-value {
   flex: 1;
   word-break: break-word;
+  font-size: clamp(13px, 1.5vw, 14px);
 }
 
 :deep(.arco-alert-content-message) {
@@ -215,7 +220,57 @@ const login = () => {
   word-break: break-word;
 }
 
+:deep(.arco-alert) {
+  font-size: clamp(13px, 1.5vw, 14px);
+}
+
+:deep(.arco-form-item-label) {
+  font-size: clamp(14px, 1.6vw, 16px);
+}
+
+:deep(.arco-form-item) {
+  margin-bottom: min(24px, 3vh);
+}
+
+:deep(.arco-input),
+:deep(.arco-input-password) {
+  height: min(36px, 5vh);
+  font-size: clamp(14px, 1.6vw, 16px);
+}
+
+:deep(.arco-btn) {
+  height: min(38px, 5vh);
+  font-size: clamp(14px, 1.6vw, 16px);
+}
+
 /* 响应式调整 */
+@media screen and (max-width: 768px) {
+  .login-container {
+    padding: 16px;
+  }
+  
+  .login-card {
+    padding: 16px;
+  }
+  
+  .title h1 {
+    font-size: 20px;
+  }
+  
+  :deep(.arco-alert-title) {
+    font-size: 15px;
+  }
+  
+  :deep(.arco-form-item-label) {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  
+  :deep(.arco-alert-icon) {
+    font-size: 16px;
+  }
+}
+
 @media screen and (max-height: 600px) {
   .login-container {
     align-items: flex-start;
@@ -233,6 +288,70 @@ const login = () => {
 
   :deep(.arco-space) {
     gap: 12px !important;
+  }
+  
+  :deep(.arco-form-item) {
+    margin-bottom: 16px;
+  }
+}
+
+/* 超小屏幕 */
+@media screen and (max-width: 480px) {
+  .login-container {
+    padding: 10px;
+  }
+  
+  .login-card {
+    width: 95%;
+    padding: 12px;
+  }
+  
+  .title h1 {
+    font-size: 18px;
+  }
+  
+  :deep(.arco-form-item-label) {
+    font-size: 14px;
+  }
+  
+  :deep(.arco-input),
+  :deep(.arco-input-password) {
+    height: 34px;
+    font-size: 14px;
+  }
+  
+  :deep(.arco-btn) {
+    height: 36px;
+    font-size: 14px;
+  }
+  
+  .info-item {
+    margin-bottom: 6px;
+  }
+  
+  .info-label,
+  .info-value {
+    font-size: 13px;
+  }
+}
+
+/* 高分辨率屏幕 */
+@media screen and (min-width: 1440px) and (min-height: 900px) {
+  .login-card {
+    width: min(80%, 600px);
+    padding: 30px;
+  }
+  
+  .title {
+    margin-bottom: 30px;
+  }
+  
+  .title h1 {
+    font-size: 28px;
+  }
+  
+  :deep(.arco-form-item) {
+    margin-bottom: 28px;
   }
 }
 </style> 
