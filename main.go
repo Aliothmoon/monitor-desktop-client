@@ -12,6 +12,8 @@ import (
 	"github.com/energye/golcl/lcl/types"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/process"
+
+	"monitor-desktop-client/devices"
 )
 
 //go:embed web/dist
@@ -85,6 +87,12 @@ func registerIPCEvents() {
 
 	// 打开内嵌浏览器
 	registerOpenBrowserEvent()
+
+	// 注册USB设备监控事件
+	registerUSBMonitorEvent()
+
+	// 注册设备信息获取事件
+	registerDeviceInfoEvent()
 }
 
 func registerLoadEvent() {
@@ -215,4 +223,109 @@ func collectProcessInfo() []map[string]any {
 	}
 
 	return processInfo
+}
+
+// 注册USB设备监控事件
+func registerUSBMonitorEvent() {
+	ipc.On("getUSBDevices", func() {
+		usbDevices, err := devices.GetUSBDevices()
+		if err != nil {
+			fmt.Println("获取USB设备失败:", err)
+			ipc.Emit("usbDevicesResult", []string{}, err.Error())
+			return
+		}
+
+		// 将设备信息格式化为前端可用的格式
+		var result []map[string]interface{}
+		for _, device := range usbDevices {
+			deviceInfo := map[string]interface{}{
+				"name":         device.DeviceName,
+				"type":         device.DeviceType,
+				"manufacturer": device.Manufacturer,
+				"isStorage":    device.IsStorageType,
+				"driveLetters": device.DriveLetters,
+			}
+			result = append(result, deviceInfo)
+		}
+
+		ipc.Emit("usbDevicesResult", result, "")
+	})
+
+	// 启动定时监控USB设备
+	go monitorUSBDevices()
+}
+
+// 监控USB设备变化
+func monitorUSBDevices() {
+	var lastDevices []devices.USBDevice
+	ticker := time.NewTicker(time.Second * 3)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		currentDevices, err := devices.GetUSBDevices()
+		if err != nil {
+			continue
+		}
+
+		// 检测设备变化
+		if hasDeviceChanges(lastDevices, currentDevices) {
+			// 将设备信息发送到前端
+			var result []map[string]interface{}
+			for _, device := range currentDevices {
+				deviceInfo := map[string]interface{}{
+					"name":         device.DeviceName,
+					"type":         device.DeviceType,
+					"manufacturer": device.Manufacturer,
+					"isStorage":    device.IsStorageType,
+					"driveLetters": device.DriveLetters,
+				}
+				result = append(result, deviceInfo)
+			}
+
+			ipc.Emit("usbDevicesChanged", result)
+		}
+
+		lastDevices = currentDevices
+	}
+}
+
+// 检测设备是否有变化
+func hasDeviceChanges(old, new []devices.USBDevice) bool {
+	if len(old) != len(new) {
+		return true
+	}
+
+	// 简单比较设备ID
+	oldIDs := make(map[string]bool)
+	for _, device := range old {
+		oldIDs[device.DeviceID] = true
+	}
+
+	for _, device := range new {
+		if !oldIDs[device.DeviceID] {
+			return true
+		}
+	}
+
+	return false
+}
+
+// 注册设备信息获取事件
+func registerDeviceInfoEvent() {
+	ipc.On("getDeviceInfo", func() {
+		// 获取设备信息
+		deviceInfo, err := devices.GetDeviceInfo()
+		if err != nil {
+			fmt.Println("获取设备信息失败:", err)
+			ipc.Emit("deviceInfoResult", nil, err.Error())
+			return
+		}
+
+		// 发送设备信息到前端
+		ipc.Emit("deviceInfoResult", deviceInfo, "")
+
+		// 打印格式化的设备信息到控制台
+		fmt.Println("设备信息:")
+		fmt.Println(devices.FormatDeviceInfo(deviceInfo))
+	})
 }
