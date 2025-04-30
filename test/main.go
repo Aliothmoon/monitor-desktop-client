@@ -5,6 +5,7 @@ import (
 	"github.com/google/gopacket/pcap"
 	"log"
 	"monitor-desktop-client/devices"
+	"monitor-desktop-client/ffmpeg"
 	"monitor-desktop-client/foreground"
 	"monitor-desktop-client/netcap"
 	"monitor-desktop-client/screencap"
@@ -15,15 +16,35 @@ import (
 )
 
 func main() {
-	fmt.Println("程序启动，测试窗口监控功能...")
-	// 硬件信息可选测试
-	GetHardwareInfo()
+	//fmt.Println("程序启动，测试窗口监控功能...")
 
-	WatchNetworkInfo()
+	UnPackFfmpeg()
 
-	// 窗口监控测试
-	MonitorForegroundWindow()
+	//// 硬件信息可选测试
+	//GetHardwareInfo()
+	//
+	//WatchNetworkInfo()
+	//
+	//// 窗口监控测试
+	//MonitorForegroundWindow()
 
+}
+
+func UnPackFfmpeg() {
+	err := ffmpeg.UnPack()
+	if err != nil {
+		log.Println(err)
+	}
+	err = ffmpeg.Version()
+	if err != nil {
+		log.Println(err)
+	}
+	go func() {
+		err := ffmpeg.RtmpPushScreen("rtmp://localhost:1935/live/test")
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 }
 
 func WatchNetworkInfo() {
@@ -85,4 +106,24 @@ func MonitorForegroundWindow() {
 
 		time.Sleep(500 * time.Millisecond)
 	}
+}
+
+type ctrl struct {
+	done chan struct{}
+}
+
+func test() {
+	c := ctrl{make(chan struct{})}
+	go func() {
+		time.After(time.Second * 10)
+		c.done <- struct{}{}
+	}()
+
+	select {
+	case <-c.done:
+		fmt.Println("done")
+	case <-time.After(time.Second * 5):
+		fmt.Println("timeout")
+	}
+
 }

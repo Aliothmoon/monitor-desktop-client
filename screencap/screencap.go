@@ -21,12 +21,13 @@ func SaveTestCap() {
 		log.Println(err)
 		return
 	}
-	file, err := os.OpenFile("./test/cap/"+time.Now().Format("2006-01-02.15-04-05")+".png", os.O_CREATE|os.O_WRONLY, 0666)
+	file, err := os.OpenFile("./test/cap/"+time.Now().Format("2006-01-02.15-04-05")+".jpeg", os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	defer file.Close()
 	//png.Encode(file, screenCap)
+
 	jpeg.Encode(file, screenCap, nil)
 }
