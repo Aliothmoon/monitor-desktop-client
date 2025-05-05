@@ -35,7 +35,9 @@ type Config struct {
 
 // 全局配置
 var appConfig = &Config{
-	ServerURL:  "http://localhost:8777", // 默认服务器地址
+	//ServerURL:  "http://localhost:8777", // 默认服务器地址
+	//WSEndpoint: "ws://localhost:8777/ws/monitor",
+	ServerURL:  "https://monitor.ivresse.top/api", // 默认服务器地址
 	WSEndpoint: "ws://localhost:8777/ws/monitor",
 }
 
