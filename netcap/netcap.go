@@ -3,14 +3,15 @@ package netcap
 import (
 	"bytes"
 	"encoding/binary"
+	"log"
+	"monitor-desktop-client/utils"
+	"time"
+
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/google/gopacket/tcpassembly"
 	"github.com/google/gopacket/tcpassembly/tcpreader"
-	"log"
-	"monitor-desktop-client/utils"
-	"time"
 )
 
 const (
@@ -37,18 +38,23 @@ func OpenLive(device string) *SniStreamFactory {
 		Timeout,
 	)
 	if err != nil {
-		log.Println(err)
+		log.Println("无法打开网络设备:", device, err)
 		return nil
 	}
-	log.Println("Open Network Cap", device)
-	defer handle.Close()
+	log.Println("成功打开网络监控设备:", device)
+
+	// 注意：不要在这里提前关闭，移到协程内部
+	// defer handle.Close()
 
 	// 设置过滤器
 	err = handle.SetBPFFilter("tcp port 443")
 	if err != nil {
-		log.Println(err)
+		log.Println("设置BPF过滤器失败:", err)
+		handle.Close()
 		return nil
 	}
+	log.Println("成功设置BPF过滤器 'tcp port 443'")
+
 	// 创建TCP流重组器
 	streamFactory := &SniStreamFactory{
 		Ch: make(chan string, 1024),
@@ -63,10 +69,14 @@ func OpenLive(device string) *SniStreamFactory {
 
 	ticker := time.Tick(time.Minute)
 	utils.Go(func() {
+		defer handle.Close() // 移动到这里确保协程结束时关闭句柄
+		log.Printf("开始处理来自设备 %s 的网络数据包", device)
+
 		for {
 			select {
 			case packet := <-packets:
 				if packet == nil {
+					log.Printf("设备 %s 停止提供数据包", device)
 					return
 				}
 				if packet.NetworkLayer() == nil || packet.TransportLayer() == nil {
@@ -86,6 +96,7 @@ func OpenLive(device string) *SniStreamFactory {
 
 			case <-ticker:
 				// 定期清理过期的流
+				log.Printf("清理设备 %s 的过期流", device)
 				assembler.FlushOlderThan(time.Now().Add(-StreamExpiry))
 			}
 		}
@@ -99,17 +110,19 @@ func (s *SniStreamFactory) New(netFlow, _ gopacket.Flow) tcpassembly.Stream {
 
 	// 异步处理重组后的流数据
 	utils.Go(func() {
-		buf := make([]byte, 4096)
+		buf := make([]byte, 8192) // 增加缓冲区大小，从4096增加到8192
+		log.Printf("创建新的TCP流: %s", netFlow)
 		for {
 			n, err := r.Read(buf)
 			if err != nil {
+				log.Printf("读取TCP流结束: %s, 错误: %v", netFlow, err)
 				break
 			}
 			stream.bytes = append(stream.bytes, buf[:n]...)
 			// 尝试解析SNI
 			if sni, ok := processDataHead(stream.bytes); ok && !stream.done {
-				log.Printf("[SNI] %s (From: %s)\n", sni, netFlow)
-				s.Ch <- sni
+				log.Printf("[SNI] 成功解析域名: %s (来源: %s)", sni, netFlow)
+				s.Ch <- sni // 确保SNI数据被发送到通道
 				stream.done = true
 			}
 		}

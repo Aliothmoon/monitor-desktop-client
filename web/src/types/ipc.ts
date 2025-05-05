@@ -32,7 +32,7 @@ export interface ICheckResult {
 // 定义IPC监听事件类型
 export interface IpcEvents {
   'systemInfo': (info: string) => void;
-  'loginResult': (success: boolean, examInfo: IExamInfo) => void;
+  'loginResult': (success: boolean, examInfo: IExamInfo | null, errorMsg?: string) => void;
   'browserVisit': (url: string) => void;
   'processInfo': (processes: IProcessInfo[]) => void;
   'systemCheckResult': (result: ICheckResult) => void;

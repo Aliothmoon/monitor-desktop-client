@@ -90,8 +90,8 @@ const emit = defineEmits<{
 }>();
 
 const form = reactive({
-  username: '',
-  password: ''
+  username: '5120214350',
+  password: '123456'
 });
 const systemInfo = ref<string>('系统信息加载中...');
 const deviceInfo = ref<DeviceInfo>({} as DeviceInfo);
@@ -127,14 +127,15 @@ onMounted(() => {
   });
 
   // 监听登录结果
-  ipcService.on('loginResult', (success, examInfo) => {
-    console.log('loginResult', success, examInfo);
+  ipcService.on('loginResult', (success, examInfo, errorMsg) => {
+    console.log('loginResult', success, examInfo, errorMsg);
     isLoading.value = false;
     if (success) {
       Message.success('登录成功');
       emit('login-success', examInfo);
     } else {
-      Message.error('登录失败，请检查用户名和密码');
+      // 显示具体的错误消息
+      Message.error(errorMsg || '登录失败，请检查用户名和密码');
     }
   });
 });

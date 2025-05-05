@@ -51,12 +51,6 @@
       </div>
 
       <a-tabs v-model:active-key="activeTab" class="exam-tabs">
-        <a-tab-pane key="exam" title="考试内容">
-          <a-card class="content-card" title="考试说明">
-            <p>这里是考试说明和内容。实际应用中这里可以根据需要加载考试题目。</p>
-          </a-card>
-        </a-tab-pane>
-
         <a-tab-pane key="monitor" title="系统监控">
           <a-card title="系统进程信息">
             <a-table :bordered="true" :columns="processColumns" :data="processes" :pagination="false">
@@ -125,7 +119,7 @@ const props = defineProps<{
 }>();
 
 // 当前激活的标签页
-const activeTab = ref('exam');
+const activeTab = ref('monitor');
 
 // 浏览器相关数据
 const browserVisits = ref<BrowserVisit[]>([]);
