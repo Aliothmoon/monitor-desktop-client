@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"monitor-desktop-client/utils"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/energye/energy/v2/consts"
 	"github.com/energye/golcl/lcl"
 	"github.com/energye/golcl/lcl/types"
+	"github.com/gorilla/websocket"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/process"
 
@@ -19,6 +21,14 @@ import (
 
 //go:embed web/dist
 var resources embed.FS
+
+// Config 应用配置
+type Config struct {
+	ServerURL  string // 服务器URL
+	AccountID  int    // 考生账号ID
+	ExamID     int    // 考试ID
+	WSEndpoint string // WebSocket端点
+}
 
 func main() {
 	// 全局初始化
@@ -33,8 +43,15 @@ func main() {
 	// 初始化浏览器事件
 	cef.BrowserWindow.SetBrowserInit(setupBrowserEvents)
 
+	// 初始化配置
+	config := loadConfig()
+
+	// 启动WebSocket连接
+	_ = initWebSocket(config)
+
 	// 运行应用
 	cef.Run(app)
+
 }
 
 // 配置应用程序
@@ -331,4 +348,58 @@ func registerDeviceInfoEvent() {
 		fmt.Println("设备信息:")
 		fmt.Println(devices.FormatDeviceInfo(deviceInfo))
 	})
+}
+
+// 加载配置
+func loadConfig() *Config {
+	// 这里可以从配置文件或环境变量加载
+	// 此处使用默认配置作为示例
+	return &Config{
+		ServerURL:  "http://localhost:8777",
+		WSEndpoint: "ws://localhost:8777/ws",
+		AccountID:  0, // 这里应当从登录结果中获取
+		ExamID:     0, // 这里应当从登录结果中获取
+	}
+}
+
+// 初始化WebSocket客户端
+func initWebSocket(config *Config) *websocket.Conn {
+	// 连接WebSocket服务器
+	c, _, err := websocket.DefaultDialer.Dial(config.WSEndpoint, nil)
+	if err != nil {
+		fmt.Printf("连接WebSocket服务器失败: %v\n", err)
+		return nil
+	}
+
+	// 启动接收消息的goroutine
+	go func() {
+		for {
+			_, message, err := c.ReadMessage()
+			if err != nil {
+				fmt.Printf("读取WebSocket消息失败: %v\n", err)
+				return
+			}
+			fmt.Printf("收到消息: %s\n", message)
+			// 处理消息...
+		}
+	}()
+
+	// 发送连接成功消息
+	connectMsg := map[string]interface{}{
+		"type":       "CONNECT",
+		"message":    "客户端已连接",
+		"fromUserId": fmt.Sprintf("%d", config.AccountID),
+		"timestamp":  time.Now().UnixNano() / int64(time.Millisecond),
+	}
+
+	msgBytes, err := json.Marshal(connectMsg)
+	if err != nil {
+		fmt.Printf("序列化消息失败: %v\n", err)
+	} else {
+		if err := c.WriteMessage(websocket.TextMessage, msgBytes); err != nil {
+			fmt.Printf("发送连接消息失败: %v\n", err)
+		}
+	}
+
+	return c
 }

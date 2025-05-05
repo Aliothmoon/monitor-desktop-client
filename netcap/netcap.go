@@ -3,7 +3,6 @@ package netcap
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
@@ -21,13 +20,15 @@ const (
 	StreamExpiry = time.Minute // TCP流超时时间
 )
 
-type SniStreamFactory struct{}
+type SniStreamFactory struct {
+	Ch chan string
+}
 type SniStream struct {
 	bytes []byte
 	done  bool
 }
 
-func OpenLive(device string) {
+func OpenLive(device string) *SniStreamFactory {
 
 	handle, err := pcap.OpenLive(
 		device,
@@ -37,18 +38,21 @@ func OpenLive(device string) {
 	)
 	if err != nil {
 		log.Println(err)
-		return
+		return nil
 	}
+	log.Println("Open Network Cap", device)
 	defer handle.Close()
 
 	// 设置过滤器
 	err = handle.SetBPFFilter("tcp port 443")
 	if err != nil {
 		log.Println(err)
-		return
+		return nil
 	}
 	// 创建TCP流重组器
-	streamFactory := &SniStreamFactory{}
+	streamFactory := &SniStreamFactory{
+		Ch: make(chan string, 1024),
+	}
 	streamPool := tcpassembly.NewStreamPool(streamFactory)
 	assembler := tcpassembly.NewAssembler(streamPool)
 	assembler.MaxBufferedPagesPerConnection = 100
@@ -58,32 +62,35 @@ func OpenLive(device string) {
 	packets := packetSource.Packets()
 
 	ticker := time.Tick(time.Minute)
-	for {
-		select {
-		case packet := <-packets:
-			if packet == nil {
-				return
-			}
-			if packet.NetworkLayer() == nil || packet.TransportLayer() == nil {
-				continue
-			}
-			tcp, ok := packet.TransportLayer().(*layers.TCP)
-			if !ok {
-				continue
-			}
+	utils.Go(func() {
+		for {
+			select {
+			case packet := <-packets:
+				if packet == nil {
+					return
+				}
+				if packet.NetworkLayer() == nil || packet.TransportLayer() == nil {
+					continue
+				}
+				tcp, ok := packet.TransportLayer().(*layers.TCP)
+				if !ok {
+					continue
+				}
 
-			// 将数据包交给重组器处理
-			assembler.AssembleWithTimestamp(
-				packet.NetworkLayer().NetworkFlow(),
-				tcp,
-				packet.Metadata().Timestamp,
-			)
+				// 将数据包交给重组器处理
+				assembler.AssembleWithTimestamp(
+					packet.NetworkLayer().NetworkFlow(),
+					tcp,
+					packet.Metadata().Timestamp,
+				)
 
-		case <-ticker:
-			// 定期清理过期的流
-			assembler.FlushOlderThan(time.Now().Add(-StreamExpiry))
+			case <-ticker:
+				// 定期清理过期的流
+				assembler.FlushOlderThan(time.Now().Add(-StreamExpiry))
+			}
 		}
-	}
+	})
+	return streamFactory
 }
 
 func (s *SniStreamFactory) New(netFlow, _ gopacket.Flow) tcpassembly.Stream {
@@ -101,7 +108,8 @@ func (s *SniStreamFactory) New(netFlow, _ gopacket.Flow) tcpassembly.Stream {
 			stream.bytes = append(stream.bytes, buf[:n]...)
 			// 尝试解析SNI
 			if sni, ok := processDataHead(stream.bytes); ok && !stream.done {
-				fmt.Printf("[SNI] %s (From: %s)\n", sni, netFlow)
+				log.Printf("[SNI] %s (From: %s)\n", sni, netFlow)
+				s.Ch <- sni
 				stream.done = true
 			}
 		}

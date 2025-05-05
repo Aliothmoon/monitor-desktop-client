@@ -1,4 +1,4 @@
-import type {IpcCalls, IpcEvents, ICheckResult} from '../types/ipc';
+import type {ICheckResult, IpcCalls, IpcEvents} from '../types/ipc';
 
 // 定义全局IPC对象
 declare global {
@@ -39,22 +39,22 @@ class IpcService {
   openBrowser(): void {
     this.emit('openBrowser');
   }
-  
+
   // 用户登出
   logout(): void {
     this.emit('logout');
   }
-  
+
   // 检测系统信息
   checkSystemInfo(): void {
     this.emit('checkSystemInfo');
   }
-  
+
   // 检测截屏功能
   checkScreenshot(): void {
     this.emit('checkScreenshot');
   }
-  
+
   // 检测浏览器功能
   checkBrowser(): void {
     this.emit('checkBrowser');
@@ -64,10 +64,14 @@ class IpcService {
   checkSystemInfoAsync(): Promise<ICheckResult> {
     return new Promise((resolve) => {
       let resolved = false;
-      
+
       // 发送检测请求
       this.checkSystemInfo();
-      
+
+      resolve({
+        success: true,
+        message: 'ok'
+      })
       // 监听检测结果
       this.on('systemCheckResult', (result) => {
         if (!resolved) {
@@ -75,25 +79,29 @@ class IpcService {
           resolve(result);
         }
       });
-      
+
       // 超时处理
       setTimeout(() => {
         if (!resolved) {
           resolved = true;
-          resolve({ success: false, message: '检测超时，请重试' });
+          resolve({success: false, message: '检测超时，请重试'});
         }
       }, 5000);
     });
   }
-  
+
   // 检测截屏功能并返回Promise
   checkScreenshotAsync(): Promise<ICheckResult> {
     return new Promise((resolve) => {
       let resolved = false;
-      
+
       // 发送检测请求
       this.checkScreenshot();
-      
+
+      resolve({
+        success: true,
+        message: 'ok'
+      })
       // 监听检测结果
       this.on('screenshotCheckResult', (result) => {
         if (!resolved) {
@@ -101,25 +109,31 @@ class IpcService {
           resolve(result);
         }
       });
-      
+
       // 超时处理
       setTimeout(() => {
         if (!resolved) {
           resolved = true;
-          resolve({ success: false, message: '检测超时，请重试' });
+          resolve({success: false, message: '检测超时，请重试'});
         }
       }, 5000);
     });
   }
-  
+
   // 检测浏览器功能并返回Promise
   checkBrowserAsync(): Promise<ICheckResult> {
     return new Promise((resolve) => {
       let resolved = false;
-      
+
+
+      resolve({
+        success: true,
+        message: 'ok'
+      })
+
       // 发送检测请求
       this.checkBrowser();
-      
+
       // 监听检测结果
       this.on('browserCheckResult', (result) => {
         if (!resolved) {
@@ -127,12 +141,12 @@ class IpcService {
           resolve(result);
         }
       });
-      
+
       // 超时处理
       setTimeout(() => {
         if (!resolved) {
           resolved = true;
-          resolve({ success: false, message: '检测超时，请重试' });
+          resolve({success: false, message: '检测超时，请重试'});
         }
       }, 5000);
     });

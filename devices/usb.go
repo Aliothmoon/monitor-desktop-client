@@ -62,6 +62,7 @@ func GetUSBDevices() ([]USBDevice, error) {
 	if err != nil {
 		return nil, fmt.Errorf("获取USB存储设备失败: %v", err)
 	}
+	fmt.Println("storageDevices:", len(storageDevices))
 	devices = append(devices, storageDevices...)
 
 	// 获取其他USB外设
@@ -69,6 +70,7 @@ func GetUSBDevices() ([]USBDevice, error) {
 	if err != nil {
 		return nil, fmt.Errorf("获取USB外设失败: %v", err)
 	}
+	fmt.Println("peripheralDevices:", len(peripheralDevices))
 	devices = append(devices, peripheralDevices...)
 
 	return devices, nil
@@ -377,7 +379,6 @@ func getConnectedUsbDevicesFromRegistry() ([]USBDevice, error) {
 	if err != nil {
 		return nil, fmt.Errorf("读取USB设备ID失败: %v", err)
 	}
-
 	for _, deviceID := range deviceIDs {
 		// 打开设备子键
 		deviceKey, err := registry.OpenKey(key, deviceID, registry.READ)
@@ -392,7 +393,7 @@ func getConnectedUsbDevicesFromRegistry() ([]USBDevice, error) {
 			continue
 		}
 
-		for _, subDevice := range subDevices {
+		for _, subDevice := range subDevices[:1] {
 			subKey, err := registry.OpenKey(deviceKey, subDevice, registry.READ)
 			if err != nil {
 				continue
